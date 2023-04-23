@@ -3,7 +3,7 @@ import { Msg, systemMsg, userMsg, openaiChat } from "./OpenAI";
 export class Agent {
   systemPrompts: Msg[];
 
-  constructor(systemPrompts: string[]) {
+  constructor(systemPrompts: string[] = []) {
     this.systemPrompts = systemPrompts.map(systemMsg);
   }
 

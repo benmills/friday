@@ -5,9 +5,21 @@ import { encode } from 'gpt-3-encoder';
 
 dotenv.config({ path: '.env.local' });
 
+let DEBUG = false;
 const API_URL = 'https://api.openai.com/v1/chat/completions';
 const API_KEY = process.env.OPENAI_KEY;
-console.log("Using api key:", API_KEY);
+
+if (DEBUG) {
+  console.log("Using api key:", API_KEY);
+}
+
+export function setOpenAIDebug(debug: boolean) {
+  DEBUG = debug;
+}
+
+export function getOpenAIDebug(): boolean {
+  return DEBUG;
+}
 
 export type Msg = {
   "role": string;
@@ -32,7 +44,9 @@ export async function openaiChat(messages: Msg[]): Promise<string> {
     "messages": messages
   };
 
-  console.log("Tokens used:", getTokenCount(messages));
+  if (DEBUG) {
+    console.log("Tokens used:", getTokenCount(messages));
+  }
 
   const response = await axios.post(API_URL, requestBody, {
     headers: {

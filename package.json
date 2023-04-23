@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "start": "ts-node src/main.ts",
-    "spike": "ts-node src/spike.ts",
+    "test-agent": "ts-node src/test-agent.ts",
     "export": "ts-node src/convo-export.ts"
   },
   "author": "",
