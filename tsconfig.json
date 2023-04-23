@@ -5,8 +5,9 @@
     "esModuleInterop": true,
     "strict": true,
     "typeRoots": ["./types"],
+    "types": ["cosine-similarity"],
     "outDir": "dist"
   },
-  "include": ["src", "test", "types/**/*.d.ts"],
+  "include": ["src", "test", "types/*.d.ts"],
   "exclude": ["node_modules"]
 }

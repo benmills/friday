@@ -52,6 +52,16 @@ export async function openaiChat(messages: Msg[]): Promise<string> {
   return response.data.choices[0].message.content.trim();
 }
 
+export async function openaiEmbeddings(inputs: string[]) {
+  let requestBody = {
+    "model": "text-embedding-ada-002",
+    "input": inputs
+  };
+
+  const response = await _apiPost("/embeddings", requestBody);
+  return response.data.data.map((d: { embedding: number[] }) => d["embedding"]);
+}
+
 export async function openaiEmbedding(input: string): Promise<number[][]> {
   let requestBody = {
     "model": "text-embedding-ada-002",

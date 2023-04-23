@@ -1,23 +1,19 @@
 import { KnowledgeBaseAgent } from "../src/agents";
-import { userMsg, agentMsg, openaiEmbedding } from "../src/OpenAI";
-import cosineSimilarity from "cosine-similarity";
+import { userMsg, agentMsg, openaiEmbedding, openaiEmbeddings } from "../src/OpenAI";
+const cosineSimilarity = require('cosine-similarity');
 
-async function getRealKB() {
-  const exampleConvo = [
-    userMsg("Hey nice to meet you! I want to tell you a bit about myself and who I am."),
-    agentMsg("Ok great can you tell me more about you?"),
-    userMsg("My name is Ben and I live in Redwood City, CA. I'm working on a new startup I founded with my friend Ali called Meso"),
-    agentMsg("That's awesome! Starting a new startup is exciting, but also scary. How are you coping?"),
-    userMsg("Yeah that's true I've been trying to learn how to cope with the stress better by going on walks."),
-  ];
-  const exampleTasks = [
-    { title: "Work on Meso prototype", description: "Create an example of how Meso could be used with a DEX like Uniswap. Needs to be done by the end of the week of 4/24/23.", tags: ["meso", "development", "crypto", "deadline"] }
-  ];
+function calculateSimilarities(embeddings: number[][][], questionEmbedding: number[][]): number[] {
+  return embeddings.map(embedding => cosineSimilarity(embedding, questionEmbedding));
+}
 
-  const agent = new KnowledgeBaseAgent();
-  await agent.extractAndSaveKeyWords(exampleConvo, exampleTasks);
+function selectContext(similarities: number[], knowledgeBase: any[], topN: number): any[] {
+  const sortedIndices = similarities
+    .map((similarity, index) => ({ similarity, index }))
+    .sort((a, b) => b.similarity - a.similarity)
+    .slice(0, topN)
+    .map(({ index }) => index);
 
-  console.log(agent.knowledgeBase);
+  return sortedIndices.map(index => knowledgeBase[index]);
 }
 
 async function main() {
@@ -33,22 +29,30 @@ async function main() {
       slug: 'startup_info',
       description: "Meso is a startup founded by Ben and Ali. Task 'Work on Meso prototype' relates to their project and involves creating an example of how Meso could be used with a DEX like Uniswap.",
       related: ['startup', 'crypto', 'development']
+    },
+    {
+      title: 'Cora Birthday',
+      slug: 'startup_info',
+      description: "Cora's birthday is in July",
+      related: ['family', 'event']
     }
   ];
 
-  const embeddings: number[][] = await openaiEmbedding(JSON.stringify(exampleKB));
+  const embeddings: number[][][] = await openaiEmbeddings(exampleKB.map((k) => JSON.stringify(k)));
 
   const newMessage = 'Can you tell me more about the Meso startup?';
-  const newEmbedding = await openaiEmbedding(newMessage);
+  const newEmbedding: number[][] = await openaiEmbedding(newMessage);
 
-  const similarities = embeddings.map((embedding: object) => cosineSimilarity(embedding, newEmbedding));
-  const maxSimilarity = Math.max(...similarities);
-  const closestEmbeddings = embeddings.filter((_: object, index: number) => similarities[index] === maxSimilarity);
+  const similarities = calculateSimilarities(embeddings, newEmbedding)
+  console.log(similarities);
 
-  const relevantData = closestEmbeddings.flatMap(embedding => exampleKB.find(data => data.description.includes(embedding.join(' '))));
+  const topN = 2; // Adjust this value as needed
+  const context = selectContext(similarities, exampleKB, topN);
 
-  console.log(relevantData);
-
+  console.log("Context to provide based on message `" + newMessage + "`:");
+  console.log(context.map((c) => `${c.title}: ${c.description.substring(0, 15) + "..."} ${c.related.map((r: string) => `#${r}`)}`));
+  console.log("\nFull KB:");
+  console.log(exampleKB.map((c) => `${c.title}: ${c.description.substring(0, 15) + "..."} ${c.related.map((r: string) => `#${r}`)}`));
 }
 
 main();
