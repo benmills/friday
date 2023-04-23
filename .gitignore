@@ -2,6 +2,10 @@
 node_modules/
 dist/
 
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
 # Ignore .env.local file
 .env.local
 
@@ -13,3 +17,13 @@ keywords.json
 keywords.json.backup
 convo.json
 convo.json.backup
+
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

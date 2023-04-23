@@ -4,8 +4,9 @@
     "target": "es2019",
     "esModuleInterop": true,
     "strict": true,
+    "typeRoots": ["./types"],
     "outDir": "dist"
   },
-  "include": ["src", "test"],
+  "include": ["src", "test", "types/**/*.d.ts"],
   "exclude": ["node_modules"]
 }
