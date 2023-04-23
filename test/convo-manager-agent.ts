@@ -1,5 +1,5 @@
-import { ConvoManagerAgent } from "./agents";
-import { userMsg, agentMsg } from "./OpenAI";
+import { ConvoManagerAgent } from "../src/agents";
+import { userMsg, agentMsg } from "../src/OpenAI";
 
 async function main() {
   const agent = new ConvoManagerAgent();
