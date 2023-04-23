@@ -1,0 +1,15 @@
+# Ignore node_modules directory
+node_modules/
+dist/
+
+# Ignore .env.local file
+.env.local
+
+kb.json
+kb.json.backup
+tasks.json
+tasks.json.backup
+keywords.json
+keywords.json.backup
+convo.json
+convo.json.backup
