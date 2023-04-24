@@ -21,9 +21,18 @@ export class ConvoManagerAgent extends Agent {
     knowledgeBaseAgent?: KnowledgeBaseAgent;
   } = {}) {
     super();
-    this.convos = this.loadConversations();
+    this.convos = {}
+    this.loadConversations();
     this.lastUpdateAt = 0;
     this.knowledgeBaseAgent = knowledgeBaseAgent;
+  }
+
+  getOrStartConvo(): MainAgent {
+    if (this.currentConvo) {
+      return this.currentConvo.agent;
+    } else {
+      return this.startConvo();
+    }
   }
 
   startConvo(): MainAgent {
@@ -41,20 +50,33 @@ export class ConvoManagerAgent extends Agent {
     return this.currentConvo.agent;
   }
 
-  async updateCurrentConvoName(): Promise<void> {
-    if (this.currentConvo && (this.currentConvo.agent.convo.length - this.lastUpdateAt) >= 5) {
-      const newName = await this.nameConversation(this.currentConvo.agent.convo);
-      const oldName = this.currentConvo.name;
+  switchConvo(targetConvoName: string): MainAgent {
+    if (typeof this.convos[targetConvoName] === "undefined") {
+      throw ("Unknown convo `" + targetConvoName + "`");
+    }
 
-      if (typeof this.convos[newName] === 'undefined') {
-        console.log("Updating convo names");
-        this.currentConvo.name = newName;
-        this.convos[newName] = this.currentConvo;
-        delete this.convos[oldName];
-        this.lastUpdateAt = this.currentConvo.agent.convo.length;
-      } else {
-        throw ("Tried to overwrite a convo");
+    this.currentConvo = this.convos[targetConvoName];
+    return this.currentConvo.agent;
+  }
+
+  async updateConvoNames(): Promise<void> {
+    for (const c of Object.values(this.convos)) {
+      if (c.agent.convo.length > 5) {
+        this.updateConvoName(c);
       }
+    }
+  }
+
+  async updateConvoName(c: Convo): Promise<void> {
+    const newName = await this.nameConversation(c.agent.convo);
+    const oldName = c.name;
+
+    if (typeof this.convos[newName] === 'undefined') {
+      c.name = newName;
+      this.convos[newName] = c;
+      delete this.convos[oldName];
+    } else {
+      throw ("Tried to overwrite a convo");
     }
   }
 
@@ -80,7 +102,16 @@ Example Output:
     }
 
     this.saveLock = true;
-    fs.writeFile(CONVO_FILE, JSON.stringify(this.convos, null, 2), (error) => {
+    const convos: { name: string, convo: Msg[] }[] = [];
+
+    for (const c of Object.values(this.convos)) {
+      convos.push({
+        name: c.name,
+        convo: c.agent.convo
+      });
+    }
+
+    fs.writeFile(CONVO_FILE, JSON.stringify(convos, null, 2), (error) => {
       this.saveLock = false;
       if (error) {
         throw (error);
@@ -91,7 +122,17 @@ Example Output:
   loadConversations(): { [key: string]: Convo } {
     if (fs.existsSync(CONVO_FILE)) {
       const jsonData = fs.readFileSync(CONVO_FILE, 'utf-8');
-      return JSON.parse(jsonData) as { [key: string]: Convo }
+      const convos = JSON.parse(jsonData) as { name: string, convo: Msg[] }[];
+      this.convos = {};
+
+      for (const c of convos) {
+        this.convos[c.name] = {
+          name: c.name,
+          agent: new MainAgent({ convo: c.convo })
+        };
+      }
+
+      this.currentConvo = Object.values(this.convos)[0];
     }
 
     return {};

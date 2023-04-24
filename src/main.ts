@@ -16,7 +16,7 @@ const keyWordAgent = new KeyWordAgent();
 const knowledgeBaseAgent = new KnowledgeBaseAgent();
 
 const convoManager = new ConvoManagerAgent({ knowledgeBaseAgent });
-let agent = convoManager.startConvo();
+let agent = convoManager.getOrStartConvo();
 
 async function promptUser(): Promise<void> {
   console.log(" ");
@@ -24,6 +24,9 @@ async function promptUser(): Promise<void> {
     console.log(" ");
 
     const commands: { [key: string]: () => void } = {
+      "/history": () => {
+        console.log(agent.convo.map((m) => `${m.role}: ${m.content.substr(0, 60)}...`).join("\n"));
+      },
       "/todo": () => {
         console.log(taskAgent.tasks);
       },
@@ -68,6 +71,7 @@ async function promptUser(): Promise<void> {
 
         if (typeof targetConvoKey !== "undefined") {
           console.log("Switching to convo ", targetConvoKey);
+          agent = convoManager.switchConvo(targetConvoKey);
         } else {
           console.log("Error:", "Unable to find convo for command", input.trim());
         }
@@ -76,7 +80,7 @@ async function promptUser(): Promise<void> {
       }
     } else {
       console.log(`Bot: ${await agent.sendMessageWithContext(input)}`);
-      convoManager.updateCurrentConvoName();
+      convoManager.updateConvoNames();
       convoManager.saveConversations();
     }
 

@@ -23,7 +23,7 @@ async function main() {
     { title: "Work on Meso prototype", description: "Create an example of how Meso could be used with a DEX like Uniswap. Needs to be done by the end of the week of 4/24/23.", tags: ["meso", "development", "crypto", "deadline"] }
   ];
 
-  await agent.extractAndSaveKeyWords(exampleConvo, exampleTasks);
+  await agent.generateNewKnowledgeBase(exampleConvo, exampleTasks);
   assert(agent.knowledgeBase.length > 0, "Expected to find some KB entries, but found none.");
 
   // console.log(agent.knowledgeBase);

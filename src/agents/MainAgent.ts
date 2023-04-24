@@ -4,20 +4,17 @@ import { KeyWordAgent } from "./KeyWordAgent";
 import { KnowledgeBaseAgent } from "./KnowledgeBaseAgent";
 import { TaskAgent } from "./TaskAgent";
 
-// import fs from 'fs';
-
-// const CONVO_FILE = 'convo.json';
-
 export class MainAgent extends Agent {
   convo: Msg[];
   taskAgent: TaskAgent | undefined;
   keyWordAgent: KeyWordAgent | undefined;
   knowledgeBaseAgent: KnowledgeBaseAgent | undefined;
 
-  constructor({ taskAgent, keyWordAgent, knowledgeBaseAgent }: {
+  constructor({ convo, taskAgent, keyWordAgent, knowledgeBaseAgent }: {
     taskAgent?: TaskAgent;
     keyWordAgent?: KeyWordAgent;
     knowledgeBaseAgent?: KnowledgeBaseAgent;
+    convo?: Msg[];
   } = {}) {
     const personalityData = {
       'formality_level': 'informal',
@@ -40,7 +37,12 @@ I want you to parse the following JSON object and use it to respond to the last 
 ${JSON.stringify(personalityData)}
     `]);
 
-    this.convo = this.loadConversation();
+    if (convo) {
+      this.convo = convo;
+    } else {
+      this.convo = [];
+    }
+
     this.taskAgent = taskAgent;
     this.keyWordAgent = keyWordAgent;
     this.knowledgeBaseAgent = knowledgeBaseAgent;
@@ -56,37 +58,9 @@ ${JSON.stringify(personalityData)}
       this.convo.push(agentMsg(response));
 
       this.knowledgeBaseAgent.processRecentMessages([userMsg(message), agentMsg(response)]);
-      this.saveConversation();
       return response;
     } else {
       throw ("Tried to call sendMessageWithContext without a knowledgeBaseAgent");
     }
-  }
-
-  async sendMessage(message: string): Promise<string> {
-    this.convo.push(userMsg(message));
-
-    const response = await this._sendMessage(this.convo, [
-      // ...this.taskAgent.getContextPrompts(),
-      // ...this.keyWordAgent.getContextPrompts(),
-      // ...this.knowledgeBaseAgent.getContextPrompts(),
-    ]);
-
-    this.convo.push(agentMsg(response));
-    this.saveConversation();
-    return response;
-  }
-
-  saveConversation(): void {
-    // fs.writeFileSync(CONVO_FILE, JSON.stringify(this.convo, null, 2));
-  }
-
-  loadConversation(): Msg[] {
-    // if (fs.existsSync(CONVO_FILE)) {
-    //   const jsonData = fs.readFileSync(CONVO_FILE, 'utf-8');
-    //   return JSON.parse(jsonData) as Msg[];
-    // }
-
-    return [];
   }
 }
