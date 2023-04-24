@@ -59,10 +59,15 @@ export class ConvoManagerAgent extends Agent {
   }
 
   async updateConvoNames(): Promise<void> {
-    for (const c of Object.values(this.convos)) {
-      if (c.agent.convo.length > 5) {
-        this.updateConvoName(c);
+    try {
+      for (const c of Object.values(this.convos)) {
+        if (c.agent.convo.length > 5) {
+          this.updateConvoName(c);
+        }
       }
+    } catch (e) {
+      console.error(e);
+      console.error("Error updating convo names");
     }
   }
 

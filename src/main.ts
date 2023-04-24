@@ -1,6 +1,7 @@
 import { setOpenAIDebug, getOpenAIDebug } from "./OpenAI";
 import { MainAgent, TaskAgent, KeyWordAgent, KnowledgeBaseAgent, ConvoManagerAgent } from "./agents";
 import readline from 'readline';
+import ansi256 from 'chalk';
 
 console.log("Starting up...");
 console.log("loading history...");
@@ -20,7 +21,17 @@ let agent = convoManager.getOrStartConvo();
 
 async function promptUser(): Promise<void> {
   console.log(" ");
-  rl.question('You: ', async (input: string) => {
+
+  const lightPurple = '\x1b[1;35m';
+  const gray = '\x1b[90m';
+  const resetColor = '\x1b[0m';
+
+  // `🔮 ${ansi256(141)("[")} <curCo> ${ansi256(141)("]")} $ ` :
+  const prompt = convoManager.currentConvo ?
+    `🔮 ${gray}[${convoManager.currentConvo.name}] ${lightPurple}$${resetColor} ` :
+    `🔮 $ `;
+
+  rl.question(prompt, async (input: string) => {
     console.log(" ");
 
     const commands: { [key: string]: () => void } = {
@@ -51,13 +62,13 @@ async function promptUser(): Promise<void> {
         const convoKeys = Object.keys(convoManager.convos);
         for (const i in convoKeys) {
           const n = convoKeys[i];
-          console.log(`[${i}]: ${n}`);
+          console.log(`[${i}]: ${n} `);
         }
-        console.log("Type `/convos switch <number>` to switch to a specific conversation. `/convos new` to start a new convo");
+        console.log("Type `/ convos switch <number>` to switch to a specific conversation. ` / convos new ` to start a new convo");
       },
       "/convos new": () => {
         agent = convoManager.startConvo();
-        console.log("Started new convo. `/convos` to see all active convos");
+        console.log("Started new convo. `/ convos` to see all active convos");
       },
     };
 
@@ -79,7 +90,7 @@ async function promptUser(): Promise<void> {
         console.log("Error:", "Unknown command", input.trim());
       }
     } else {
-      console.log(`Bot: ${await agent.sendMessageWithContext(input)}`);
+      console.log(`👾: ${await agent.sendMessageWithContext(input)} `);
       convoManager.updateConvoNames();
       convoManager.saveConversations();
     }
@@ -89,4 +100,5 @@ async function promptUser(): Promise<void> {
 }
 
 console.log("Ready!");
+console.clear();
 promptUser();

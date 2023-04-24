@@ -166,6 +166,7 @@ Example output format:
     } catch (e) {
       console.log("Agent response:", response);
       console.log(e);
+      console.error("Knowledge Base Agent failed to parse output JSON");
     };
   }
 
