@@ -12,7 +12,7 @@ export type Knowledge = {
   title: string;
   description: string;
   related: string[];
-}
+};
 
 export class KnowledgeBaseAgent extends Agent {
   knowledgeBase: Knowledge[];
@@ -39,7 +39,7 @@ ${message}
 
   getContextPrompts(): Msg[] {
     if (this.knowledgeBase.length == 0) {
-      return []
+      return [];
     }
 
     return [systemMsg(`
@@ -177,7 +177,7 @@ Example output format:
     if (this.embeddings) {
       const queryEmbedding: number[][] = await openaiEmbedding(query);
 
-      const similarities = this.calculateSimilarities(this.embeddings, queryEmbedding)
+      const similarities = this.calculateSimilarities(this.embeddings, queryEmbedding);
 
       const sortedIndices = similarities
         .map((similarity, index) => ({ similarity, index }))
