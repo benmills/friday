@@ -128,7 +128,7 @@ Example Output:
       for (const c of convos) {
         this.convos[c.name] = {
           name: c.name,
-          agent: new MainAgent({ convo: c.convo })
+          agent: new MainAgent({ convo: c.convo, knowledgeBaseAgent: this.knowledgeBaseAgent })
         };
       }
 
