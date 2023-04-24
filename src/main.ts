@@ -10,12 +10,12 @@ const rl = readline.createInterface({
   output: process.stdout
 });
 
-const convoManager = new ConvoManagerAgent();
 
 const taskAgent = new TaskAgent();
 const keyWordAgent = new KeyWordAgent();
 const knowledgeBaseAgent = new KnowledgeBaseAgent();
 
+const convoManager = new ConvoManagerAgent({ knowledgeBaseAgent });
 let agent = convoManager.startConvo();
 
 async function promptUser(): Promise<void> {
@@ -37,6 +37,13 @@ async function promptUser(): Promise<void> {
       "/kb": () => {
         console.log(knowledgeBaseAgent.knowledgeBase);
       },
+      "/kb cleanup": async () => {
+        setOpenAIDebug(true);
+        const prevCount = Object.keys(knowledgeBaseAgent.knowledgeBase).length;
+        await knowledgeBaseAgent.cleanUpKB();
+        console.log("Cleaned up KB! Change:", Object.keys(knowledgeBaseAgent.knowledgeBase).length - prevCount);
+        setOpenAIDebug(false);
+      },
       "/convos": () => {
         const convoKeys = Object.keys(convoManager.convos);
         for (const i in convoKeys) {
@@ -47,6 +54,7 @@ async function promptUser(): Promise<void> {
       },
       "/convos new": () => {
         agent = convoManager.startConvo();
+        console.log("Started new convo. `/convos` to see all active convos");
       },
     };
 
@@ -67,15 +75,14 @@ async function promptUser(): Promise<void> {
         console.log("Error:", "Unknown command", input.trim());
       }
     } else {
-      console.log(`Bot: ${await agent.sendMessage(input)}`);
+      console.log(`Bot: ${await agent.sendMessageWithContext(input)}`);
       convoManager.updateCurrentConvoName();
-      // taskAgent.extractAndSaveTasks(agent.convo);
+      convoManager.saveConversations();
     }
 
     promptUser();
   });
 }
 
-// knowledgeBaseAgent.extractAndSaveKeyWords(agent.convo, taskAgent.tasks).then(promptUser);
-console.log("Done!");
+console.log("Ready!");
 promptUser();

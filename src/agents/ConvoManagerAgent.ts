@@ -1,6 +1,9 @@
 import { Agent } from "../Agent";
 import { Msg, systemMsg, openaiChat } from "../OpenAI";
-import { MainAgent } from "./";
+import { KnowledgeBaseAgent, MainAgent } from "./";
+import fs from 'fs';
+
+const CONVO_FILE = 'convo.json';
 
 export type Convo = {
   name: string,
@@ -11,11 +14,16 @@ export class ConvoManagerAgent extends Agent {
   convos: { [key: string]: Convo };
   currentConvo: Convo | undefined;
   lastUpdateAt: number;
+  knowledgeBaseAgent: KnowledgeBaseAgent | undefined;
+  saveLock: boolean = false;
 
-  constructor() {
+  constructor({ knowledgeBaseAgent }: {
+    knowledgeBaseAgent?: KnowledgeBaseAgent;
+  } = {}) {
     super();
-    this.convos = {};
+    this.convos = this.loadConversations();
     this.lastUpdateAt = 0;
+    this.knowledgeBaseAgent = knowledgeBaseAgent;
   }
 
   startConvo(): MainAgent {
@@ -23,7 +31,7 @@ export class ConvoManagerAgent extends Agent {
 
     const newConvo = {
       name: newConvoName,
-      agent: new MainAgent()
+      agent: new MainAgent({ knowledgeBaseAgent: this.knowledgeBaseAgent })
     };
 
     this.convos[newConvoName] = newConvo;
@@ -39,12 +47,13 @@ export class ConvoManagerAgent extends Agent {
       const oldName = this.currentConvo.name;
 
       if (typeof this.convos[newName] === 'undefined') {
+        console.log("Updating convo names");
         this.currentConvo.name = newName;
         this.convos[newName] = this.currentConvo;
         delete this.convos[oldName];
         this.lastUpdateAt = this.currentConvo.agent.convo.length;
       } else {
-        throw ("Tried to overright a convo");
+        throw ("Tried to overwrite a convo");
       }
     }
   }
@@ -63,5 +72,28 @@ Example Output:
     `)]);
 
     return JSON.parse(response).name;
+  }
+
+  async saveConversations(): Promise<void> {
+    if (this.saveLock) {
+      throw ("Attempted to save convo while another save was happening");
+    }
+
+    this.saveLock = true;
+    fs.writeFile(CONVO_FILE, JSON.stringify(this.convos, null, 2), (error) => {
+      this.saveLock = false;
+      if (error) {
+        throw (error);
+      }
+    });
+  }
+
+  loadConversations(): { [key: string]: Convo } {
+    if (fs.existsSync(CONVO_FILE)) {
+      const jsonData = fs.readFileSync(CONVO_FILE, 'utf-8');
+      return JSON.parse(jsonData) as { [key: string]: Convo }
+    }
+
+    return {};
   }
 }

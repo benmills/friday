@@ -14,7 +14,11 @@ export class MainAgent extends Agent {
   keyWordAgent: KeyWordAgent | undefined;
   knowledgeBaseAgent: KnowledgeBaseAgent | undefined;
 
-  constructor(taskAgent?: TaskAgent, keyWordAgent?: KeyWordAgent, knowledgeBaseAgent?: KnowledgeBaseAgent) {
+  constructor({ taskAgent, keyWordAgent, knowledgeBaseAgent }: {
+    taskAgent?: TaskAgent;
+    keyWordAgent?: KeyWordAgent;
+    knowledgeBaseAgent?: KnowledgeBaseAgent;
+  } = {}) {
     const personalityData = {
       'formality_level': 'informal',
       'verbosity_level': 'low',
@@ -40,6 +44,23 @@ ${JSON.stringify(personalityData)}
     this.taskAgent = taskAgent;
     this.keyWordAgent = keyWordAgent;
     this.knowledgeBaseAgent = knowledgeBaseAgent;
+  }
+
+  async sendMessageWithContext(message: string): Promise<string> {
+    if (this.knowledgeBaseAgent) {
+      const messageWithContext = await this.knowledgeBaseAgent.messageWithContext(message);
+
+      const response = await this._sendMessage([...this.convo, messageWithContext]);
+
+      this.convo.push(userMsg(message));
+      this.convo.push(agentMsg(response));
+
+      this.knowledgeBaseAgent.processRecentMessages([userMsg(message), agentMsg(response)]);
+      this.saveConversation();
+      return response;
+    } else {
+      throw ("Tried to call sendMessageWithContext without a knowledgeBaseAgent");
+    }
   }
 
   async sendMessage(message: string): Promise<string> {

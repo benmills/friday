@@ -45,7 +45,7 @@ export async function openaiChat(messages: Msg[]): Promise<string> {
   };
 
   if (DEBUG) {
-    console.log("Tokens used:", getTokenCount(messages));
+    console.log("Tokens used:", getTokenCountForMessages(messages));
   }
 
   const response = await _apiPost("/chat/completions", requestBody);
@@ -57,6 +57,10 @@ export async function openaiEmbeddings(inputs: string[]) {
     "model": "text-embedding-ada-002",
     "input": inputs
   };
+
+  if (DEBUG) {
+    console.log("Tokens used:", getTokenCount(inputs));
+  }
 
   const response = await _apiPost("/embeddings", requestBody);
   return response.data.data.map((d: { embedding: number[] }) => d["embedding"]);
@@ -75,12 +79,22 @@ export async function openaiEmbedding(input: string): Promise<number[][]> {
 async function _apiPost(urlFragment: string, requestBody: object) {
   const url = API_URL + urlFragment;
   try {
-    return await axios.post(url, requestBody, {
+    if (DEBUG) {
+      console.log(`Making OpenAI API request to ${urlFragment}...`);
+    }
+
+    const response = await axios.post(url, requestBody, {
       headers: {
         'Authorization': `Bearer ${API_KEY}`,
         'Content-Type': 'application/json',
       }
     });
+
+    if (DEBUG) {
+      console.log(`API call to ${urlFragment} done...`);
+    }
+
+    return response;
   } catch (e) {
     console.error(e);
     console.log("Failed making POST request to:", url);
@@ -89,10 +103,15 @@ async function _apiPost(urlFragment: string, requestBody: object) {
   }
 }
 
-function getTokenCount(messages: Msg[]): number {
+function getTokenCountForMessages(messages: Msg[]): number {
+  return getTokenCount(messages.map((m) => `${m.role}: ${m.content}`));
+}
+
+function getTokenCount(messages: string[]): number {
   let totalTokens = 0;
   for (const m of messages) {
-    totalTokens += encode(`${m.role}: ${m.content}`).length;
+    totalTokens += encode(m).length;
   }
   return totalTokens;
 }
+

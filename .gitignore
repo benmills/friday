@@ -9,6 +9,8 @@ yarn-error.log*
 # Ignore .env.local file
 .env.local
 
+kb_embeddings.json
+kb_embeddings.json.backup
 kb.json
 kb.json.backup
 tasks.json

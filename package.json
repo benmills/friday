@@ -7,6 +7,7 @@
     "build": "tsc",
     "start": "ts-node src/main.ts",
     "test-kb": "ts-node test/kb-agent.ts",
+    "test-embedding": "ts-node test/embedding.ts",
     "test-convo-manager": "ts-node test/convo-manager-agent.ts",
     "export": "ts-node src/convo-export.ts"
   },
