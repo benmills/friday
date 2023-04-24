@@ -15,7 +15,7 @@ const taskAgent = new TaskAgent();
 const keyWordAgent = new KeyWordAgent();
 const knowledgeBaseAgent = new KnowledgeBaseAgent();
 
-const convoManager = new ConvoManagerAgent({ knowledgeBaseAgent });
+const convoManager = new ConvoManagerAgent(knowledgeBaseAgent);
 let agent = convoManager.getOrStartConvo();
 
 async function promptUser(): Promise<void> {

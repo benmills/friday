@@ -14,17 +14,16 @@ export class ConvoManagerAgent extends Agent {
   convos: { [key: string]: Convo };
   currentConvo: Convo | undefined;
   lastUpdateAt: number;
-  knowledgeBaseAgent: KnowledgeBaseAgent | undefined;
+  knowledgeBaseAgent: KnowledgeBaseAgent;
   saveLock: boolean = false;
 
-  constructor({ knowledgeBaseAgent }: {
-    knowledgeBaseAgent?: KnowledgeBaseAgent;
-  } = {}) {
+  constructor(knowledgeBaseAgent: KnowledgeBaseAgent) {
     super();
     this.convos = {}
-    this.loadConversations();
     this.lastUpdateAt = 0;
     this.knowledgeBaseAgent = knowledgeBaseAgent;
+
+    this.loadConversations();
   }
 
   getOrStartConvo(): MainAgent {
