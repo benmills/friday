@@ -1,3 +1,4 @@
+import autosize from 'autosize';
 import React, { useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
 
@@ -17,6 +18,9 @@ const BlockCursorInput: React.FC = () => {
 
   useEffect(() => {
     handleFocus();
+    if (textareaRef.current) {
+      autosize(textareaRef.current);
+    }
   }, []);
 
   return (
@@ -24,6 +28,7 @@ const BlockCursorInput: React.FC = () => {
       <Symbol>🔮</Symbol>
       <Textarea
         ref={textareaRef}
+        rows={1}
         value={input}
         onChange={handleChange}
       />
@@ -40,12 +45,14 @@ const Wrapper = styled.div`
 `;
 
 const Textarea = styled.textarea`
+  display: block;
   color: #fff;
   background-color: transparent;
   border: none;
   width: 100%;
   resize: none;
-  text-indent: 3ch;
+  text-indent: 1ch;
+  display: block;
 
   &:focus-visible {
     outline: none;
@@ -53,8 +60,8 @@ const Textarea = styled.textarea`
 `;
 
 const Symbol = styled.span`
-  position: absolute;
-  top: 1px;
+  position: relative;
+  top: 0;
   left: 0;
   color: #ff00d9;
 `;

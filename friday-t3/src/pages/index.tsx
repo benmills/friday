@@ -2,6 +2,7 @@ import { type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import styled from "styled-components";
+import Tabs from "~/components/Tabs";
 import Terminal from "~/components/Terminal";
 
 import { api } from "~/utils/api";
@@ -17,6 +18,7 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Main>
+        <Tabs />
         <Terminal />
       </Main>
     </>
@@ -24,9 +26,11 @@ const Home: NextPage = () => {
 };
 
 const Main = styled.main`
+  display: flex;
+  flex-direction: column;
   height: 100%;
   width: 100%;
-  
+
   * {
     font-family: "FiraCodeRegular"
   }
