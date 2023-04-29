@@ -51,7 +51,7 @@ const Textarea = styled.textarea`
   border: none;
   width: 100%;
   resize: none;
-  text-indent: 1ch;
+  text-indent: 3ch;
   display: block;
 
   &:focus-visible {
@@ -60,7 +60,7 @@ const Textarea = styled.textarea`
 `;
 
 const Symbol = styled.span`
-  position: relative;
+  position: absolute;
   top: 0;
   left: 0;
   color: #ff00d9;
