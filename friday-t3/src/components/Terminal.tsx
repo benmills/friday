@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
-import BlockCursorInput from './BlockCursorInput';
+import TerminalInput from './TerminalInput';
 
 const Terminal = () => {
   return (
@@ -55,7 +55,7 @@ const Terminal = () => {
             Sources: <a href="https://www.gpt3demo.com/">GPT-3 Demo</a>, <a href="https://www.youtube.com/watch?v=9W6YAZjJz4o">OpenAI GPT-3: How It Works & Why It Matters</a>
           </MemorySources>
         </Response>
-        <BlockCursorInput />
+        <TerminalInput />
       </Chat>
     </Wrapper>
   );

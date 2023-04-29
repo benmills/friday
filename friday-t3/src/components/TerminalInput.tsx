@@ -2,9 +2,16 @@ import autosize from 'autosize';
 import React, { useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
 
-const BlockCursorInput: React.FC = () => {
+const TerminalInput: React.FC = () => {
   const [input, setInput] = React.useState('');
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+
+  const handleSubmit = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !(e.ctrlKey || e.metaKey || e.shiftKey)) {
+      e.preventDefault();
+      setInput('');
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
@@ -31,6 +38,7 @@ const BlockCursorInput: React.FC = () => {
         rows={1}
         value={input}
         onChange={handleChange}
+        onKeyDown={handleSubmit}
       />
     </Wrapper>
   );
@@ -66,4 +74,4 @@ const Symbol = styled.span`
   color: #ff00d9;
 `;
 
-export default BlockCursorInput;
+export default TerminalInput;
