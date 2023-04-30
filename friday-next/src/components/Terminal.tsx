@@ -1,61 +1,41 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import TerminalInput from './TerminalInput';
 
+import { Message, userMsg, assistantMsg } from "../OpenAITypes";
+
 const Terminal = () => {
+  const [history, setHistory] = useState<Message[]>([]);
+
+  const onUserInput = async (input: string) => {
+    setHistory((prevHistory) => [...prevHistory, userMsg(input)]);
+
+    const resp = await fetch(`${window.location.origin}/api/chat`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ "user_message": input })
+    });
+
+    const fridayMsg = assistantMsg((await resp.json()).friday_response);
+
+    setHistory((prevHistory) => [...prevHistory, fridayMsg]);
+  };
+
   return (
     <Wrapper>
       <Chat>
-        <WelcomeMessage>
-          <Logo>
-            ████╗ ██╗██████╗ ██████╗ ██╗   ██╗
-            ██╔═██╗██║██╔══██╗╚════██╗╚██╗ ██╔╝
-            ██║ ██║██║██████╔╝ █████╔╝ ╚████╔╝
-            ████╔╝██║██╔══██╗██╔═══╝   ╚██╔╝
-            ╚═══╝ ╚═╝██║  ██║███████╗   ██║
-            ╚═╝  ╚═╝╚══════╝   ╚═╝
-          </Logo>
-        </WelcomeMessage>
-        <Prompt>
-          🔑 Enter API key: 123e4567-e89b-12d3-a456-426614174000
-        </Prompt>
-        <Response>
-          Welcome to Friday Chat! Please enter a command to get started.
-          <MemorySources>
-            Sources: <a href="https://www.gpt3demo.com/">GPT-3 Demo</a>, <a href="https://www.youtube.com/watch?v=9W6YAZjJz4o">OpenAI GPT-3: How It Works & Why It Matters</a>
-          </MemorySources>
-        </Response>
-
-        <Prompt>
-          🔮 What is Friday Chat?
-        </Prompt>
-        <Response>
-          Friday Chat is a multi-agent chat application that utilizes GPT to provide users with a seamless and informative conversational experience. The app is designed to assist users in various tasks by connecting them with specialized chat agents, all while maintaining an easy-to-use interface.
-          <MemorySources>
-            Sources: <a href="https://www.gpt3demo.com/">GPT-3 Demo</a>, <a href="https://www.youtube.com/watch?v=9W6YAZjJz4o">OpenAI GPT-3: How It Works & Why It Matters</a>
-          </MemorySources>
-        </Response>
-
-        <Prompt>
-          🔮 Write a code block for a red dot using styled-components
-        </Prompt>
-        <Response>
-          Here is a code block for a red dot using styled-components:
-          <Code>
-            {`
-            const RedDot = styled.div\`
-                width: 10px;
-                height: 10px;
-                border-radius: 50%;
-                background-color: red;
-            \`;
-            `}
-          </Code>
-          <MemorySources>
-            Sources: <a href="https://www.gpt3demo.com/">GPT-3 Demo</a>, <a href="https://www.youtube.com/watch?v=9W6YAZjJz4o">OpenAI GPT-3: How It Works & Why It Matters</a>
-          </MemorySources>
-        </Response>
-        <TerminalInput />
+        {history.map((m: Message, key) => {
+          if (m.role === "assistant") {
+            return <Response key={key}>{m.content}</Response>
+          } else if (m.role === "user") {
+            return <Prompt key={key}>{m.content}</Prompt>
+          } else {
+            return <Response key={key}>Error! {JSON.stringify(m)}</Response>
+          }
+        })}
+        <TerminalInput onInput={onUserInput} />
       </Chat>
     </Wrapper>
   );

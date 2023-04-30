@@ -2,13 +2,18 @@ import autosize from 'autosize';
 import React, { useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
 
-const TerminalInput: React.FC = () => {
+type TerminalInputPromps = {
+  onInput?: (input: string) => void
+};
+
+const TerminalInput: React.FC<TerminalInputPromps> = ({ onInput = (_) => { } }) => {
   const [input, setInput] = React.useState('');
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
 
   const handleSubmit = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !(e.ctrlKey || e.metaKey || e.shiftKey)) {
       e.preventDefault();
+      onInput(input);
       setInput('');
     }
   };
