@@ -5,6 +5,16 @@ import TerminalInput from './TerminalInput';
 import { Message, userMsg, assistantMsg } from "../OpenAITypes";
 
 const Terminal = () => {
+  useEffect(() => {
+    console.log("set up popstate list.");
+    const handlePopState = () => {
+      console.log('URL changed:', window.location.href);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   const [history, setHistory] = useState<Message[]>([]);
 
   const onUserInput = async (input: string) => {

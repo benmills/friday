@@ -1,27 +1,36 @@
 import Link from 'next/link';
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import UnstyledButton from './UnstyledButton';
 import SpinningDots from './SpinningDots';
 import { Plus, X } from 'react-feather';
 
 const Tabs = () => {
+  const [tabs, setTabs] = useState([0]);
+  const [currentTab, setCurrentTab] = useState<number>(0);
+
+  const addTab = () => {
+    setTabs((prevTabs) => [...prevTabs, prevTabs.length]);
+  };
+
+  const switchTab = (newTab: number) => {
+    setCurrentTab(newTab);
+    console.log('tabs not really working!!');
+  };
+
   return (
     <Wrapper>
-      <Tab isActive={true}>
-        <TabLink href="/chat/0">
-          [Friday AI app wiki
-          {' '}<SpinningDots />]
-          {' '}
-          <CloseTab><X /></CloseTab>
-        </TabLink>
-      </Tab>
-      <Tab isActive={false}>
-        <TabLink href="/chat/1">
-          [New Chat 1]{' '}<CloseTab><X /></CloseTab>
-        </TabLink>
-      </Tab>
-      <AddTab onClick={() => console.log("add a tab here")}><Plus /></AddTab>
+      {tabs.map((t) => (
+        <Tab onClick={() => switchTab(t)} key={t} isActive={t == currentTab}>
+          <TabLink href={`/chat/${t}`}>
+            [Chat
+            {' '}<SpinningDots />]
+            {' '}
+            <CloseTab><X /></CloseTab>
+          </TabLink>
+        </Tab>
+      ))}
+      <AddTab onClick={addTab}><Plus /></AddTab>
       <Logo href="/">FRIDAY</Logo>
     </Wrapper>
   );
